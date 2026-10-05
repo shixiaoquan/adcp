@@ -87,8 +87,10 @@ const ACTIVE_SURFACE_VERSION = semver.prerelease(PACKAGE_VERSION)
 // from colliding with BiddingPolicy's CostPer and Strength. It is embedded in
 // list_products, request_proposals, and refine_proposals (~0.5 KiB each),
 // measured at 452,953 bytes (442.3 KiB) and bounded at 443 KiB.
+// Core gender adds one shared predicate and age/gender support rules, bringing
+// the measured media-buy inputs to 455,211 bytes (444.5 KiB), bounded at 445 KiB.
 const MODEL_CONTEXT_BUDGET_KIB = {
-  'media-buy': 443,
+  'media-buy': 445,
   creative: 410,
 };
 // Keep parity compilation materially tighter than the 4 MiB protocol schema
@@ -98,8 +100,10 @@ const MODEL_CONTEXT_BUDGET_KIB = {
 // supported_viewability_standards capability add ~1.8 KB to the
 // comply_test_controller request, which already sat at 1_249_930 bytes.
 // Experimental Product.execution_requirements (#7763) reaches it through the
-// seeded Product and brings it to ~1_260_400 bytes.
-const PARITY_COMPILE_LIMIT = 1_265_000;
+// seeded Product and brings it to ~1_260_400 bytes. Core gender predicates,
+// capabilities, and signal metadata bring the controller to 1_270_436 bytes;
+// retain a tight measured bound without skipping any fixture compilation.
+const PARITY_COMPILE_LIMIT = 1_271_000;
 
 function readJson(filename) {
   return JSON.parse(fs.readFileSync(filename, 'utf8'));
