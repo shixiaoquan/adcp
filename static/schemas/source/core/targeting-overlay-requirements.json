@@ -180,8 +180,11 @@
         { "$ref": "#/definitions/required" },
         {
           "type": "object",
-          "properties": { "age": { "$ref": "#/definitions/required" } },
-          "required": ["age"],
+          "properties": {
+            "age": { "$ref": "#/definitions/required" },
+            "gender": { "$ref": "#/definitions/required" }
+          },
+          "anyOf": [{ "required": ["age"] }, { "required": ["gender"] }],
           "additionalProperties": false
         }
       ]

@@ -302,9 +302,10 @@
           "type": "object",
           "properties": {
             "age": { "$ref": "#/definitions/supported" },
+            "gender": { "$ref": "#/definitions/supported" },
             "ext": { "$ref": "/schemas/core/ext.json" }
           },
-          "required": ["age"],
+          "anyOf": [{ "required": ["age"] }, { "required": ["gender"] }],
           "additionalProperties": true
         }
       ]
