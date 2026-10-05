@@ -111,6 +111,24 @@ describe('training seller core gender targeting', () => {
     expect(audit.media_buys[0].packages[0]).not.toHaveProperty('targeting_resolution');
   });
 
+  it('keeps literal prototype keys from becoming inherited targeting dimensions', async () => {
+    const productId = await seed(nativeCapability);
+    const created = await create(productId, { gender });
+    expect(created, JSON.stringify(created)).not.toHaveProperty('errors');
+    const targeting = JSON.parse('{"__proto__":{"property_list":{"agent_url":"https://publisher.example","list_id":"nested-list"}}}');
+    const changed = await call('update_media_buy', { account, media_buy_id: created.media_buy_id,
+      revision: created.revision, packages: [{ package_id: created.packages[0].package_id,
+        targeting_overlay: targeting }] });
+    expect(changed, JSON.stringify(changed)).not.toHaveProperty('errors');
+    const overlay = changed.affected_packages[0].targeting_overlay;
+    expect(overlay).not.toHaveProperty('property_list');
+    expect(overlay).toMatchObject({ geo_countries: ['US'], demographics: { gender } });
+    expect(Object.hasOwn(overlay, '__proto__')).toBe(true);
+    expect(overlay.__proto__).toEqual(targeting.__proto__);
+    const audit = await call('get_media_buys', { account, media_buy_ids: [created.media_buy_id] });
+    expect(audit.media_buys[0].packages[0].targeting_overlay).toEqual(overlay);
+  });
+
   it('rejects undeclared, unsupported-category and incompatible unknown predicates before create', async () => {
     const productId = await seed({ gender: {
       execution_modes: ['native'], values: ['female', 'male'], unknown_handling: 'always_excluded',

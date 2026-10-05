@@ -8652,7 +8652,10 @@ function genderTargetingMutation(
   const effective: Record<string, unknown> = structuredClone(base ?? {});
   for (const [dimension, value] of Object.entries(input)) {
     if (value === null) delete effective[dimension];
-    else effective[dimension] = structuredClone(value);
+    // Open schema keys are data, including a literal __proto__ key.
+    else Object.defineProperty(effective, dimension, {
+      value: structuredClone(value), enumerable: true, writable: true, configurable: true,
+    });
   }
   return Object.keys(effective).length > 0 ? effective : undefined;
 }
