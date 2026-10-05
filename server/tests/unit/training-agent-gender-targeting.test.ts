@@ -313,7 +313,7 @@ describe('training seller core gender targeting', () => {
   });
 
   it('inherits configured demographics on omission and requires a requote for incomplete replacement', async () => {
-    const productId = await seed(nativeCapability);
+    await seed(nativeCapability);
     const discovered = await call('get_products', { account, buying_mode: 'brief', brief: 'Display for adults',
       filters: { channels: ['display'], pricing_currencies: ['USD'] },
       targeting_overlay: { demographics: { age, gender } } });
