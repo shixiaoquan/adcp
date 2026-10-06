@@ -108,6 +108,7 @@
             { "required": ["quality"] },
             { "required": ["concept_id"] },
             { "required": ["keep_mode"] },
+            { "required": ["refinement_scope"] },
             { "required": ["max_spend"] },
             { "required": ["brand"] },
             { "required": ["media_buy_id"] },
@@ -250,6 +251,11 @@
       "type": "string",
       "x-entity": "build_variant",
       "description": "Refine a previously produced variant and return new lineage-linked variants. The transformer and target capability are inherited from the parent leaf. A refinement request MUST omit transformer_id, target_capability_id(s), and deprecated target_format_id(s); changing transformer or output format is a new transformation build, not refinement. Requires creative.supports_refinement. Compliance carries forward: the effective compliance set of a refinement is the `compliance` set (required_disclosures, prohibited_claims) of the parent leaf's retained build inputs, plus anything additionally supplied on the request, which can only add to it. `message` and `config` cannot remove or narrow it; an instruction that does (e.g. \"remove the disclaimer\") MUST fail the call with COMPLIANCE_UNSATISFIED. A refined leaf never inherits the parent's approval state."
+    },
+    "refinement_scope": {
+      "type": "string",
+      "enum": ["style", "copy", "layout", "mixed"],
+      "description": "Buyer-declared, ADVISORY hint describing what kind of change this refinement asks for, so the buyer's own governance/orchestration agent can route it (e.g. copy edits to legal review) without parsing `message`. `style`: aesthetic treatment (tone, color, lighting, imagery mood). `copy`: any change to words a viewer reads or hears (headline, CTA, body, disclosures, voiceover). `layout`: placement, size, or arrangement of existing elements. `mixed`: more than one of these. Omit when unknown — absence means undeclared, not `style`. A self-declared hint, NOT an authorization, approval-gate input, or compliance control: the seller is not required to validate it, it MUST NOT reduce any obligation on refinement (compliance carry-forward, no inherited approval), and a `style` or `layout` label does not make a change compliance-neutral (e.g. shrinking a disclosure is a layout change with compliance impact). Valid only with `refine_from_build_variant_id`. The response echoes `refinement_scope_applied`."
     },
     "mode": {
       "type": "string",
@@ -429,5 +435,8 @@
   "required": [
     "idempotency_key"
   ],
+  "dependencies": {
+    "refinement_scope": ["refine_from_build_variant_id"]
+  },
   "additionalProperties": true
 }
