@@ -96,7 +96,7 @@ describe('perspective asset cache privacy', () => {
   let server: HTTPServer | undefined;
 
   beforeEach(() => {
-    mocks.query.mockReset();
+    mocks.query.mockReset().mockResolvedValue({ rows: [] });
     mocks.getAssetData.mockReset();
     mocks.getPerspectiveWithIllustration.mockReset();
     mocks.generatePerspectiveCard.mockReset();
@@ -117,7 +117,11 @@ describe('perspective asset cache privacy', () => {
     [true, undefined, 'public, max-age=0, must-revalidate'],
     [false, 'draft-author', 'private, no-store'],
   ])('sets visibility-aware asset caching when is_public=%s', async (isPublic, userId, expected) => {
-    mocks.query.mockResolvedValueOnce({ rows: [{ id: 'perspective-1', is_public: isPublic }] });
+    // HTTP startup can index knowledge in the background. Its queries must not
+    // consume the route's visibility fixture before the request reaches it.
+    mocks.query.mockImplementation(async (sql: string) => ({
+      rows: sql.includes('AS is_public') ? [{ id: 'perspective-1', is_public: isPublic }] : [],
+    }));
     mocks.getAssetData.mockResolvedValueOnce({
       file_data: Buffer.from('asset bytes'),
       file_mime_type: 'image/png',
